@@ -1,0 +1,87 @@
+(defconstant *rules* 
+  '(
+   (0 1 4 5)
+   (0 1 5)
+   (2 3 6)
+   (2 3 6 7)
+   (0 4 5)
+   (0 2 5 8)
+   (1 3 6 9)
+   (3 6 7)
+   (8 9 12)
+   (4 6 9 12)
+   (5 7 10 13)
+   (10 11 15)
+   (8 9 12 13)
+   (9 10 12 13)
+   (9 10 14 15)
+   (10 11 14 15)))
+
+(defconstant *elms* 16)
+(defconstant *elms_per_row* 4)
+
+(defun Play ()
+  (let (Game RndSt Move (StepCnt 0))
+    (setf RndState (make-random-state t)
+          Game (Init_Game RndState))
+    (format t "~%~5TStart state ~%~%")
+    (Display_Game Game)
+    (loop
+     (when (Check_Win Game) (return))
+     (setf Move (Choose_Move)
+           Game (Do_Move Game Move)
+           StepCnt (1+ StepCnt))
+     (format t "~%~5TStep ~2D   Pressed ~D ~%" StepCnt Move)
+     (Display_Game Game))
+    (Congratulations StepCnt)))
+          
+
+(defun Display_Game (G)
+  (let (value) 
+    (sort G #'<)
+    (dotimes (number *elms* value) 
+      (progn
+        (if (member number G) (princ "X")
+          (princ "O"))
+        (princ "|")
+        (when (eq (mod (1+ number) *elms_per_row*) 0) (format t "~%")))))) 
+
+; I wanted to do it recursively just for practice. definitly wasnt needed
+(defun Init_Game (&optional (RS (make-random-state t)) (Count 0))
+  ;'(0 1 4 5)) test Game that takes one move
+  ;'(0 1 4 5 2 3 6)) test game that takes two moves
+  (if (eql Count *elms*) NIL
+    (let ((randNum (random 2)))
+      (if (eql randNum 1) 
+        (cons Count (Init_Game RS (1+ Count)))
+        (Init_Game RS (1+ Count))))))
+  
+
+(defun Choose_Move()
+  (progn
+    (format t "~%Please Enter a number (0-~A): " (1- *elms*))
+    (let ((input (read)))
+      (if (and (>= input 0) (<= input (1- *elms*))) input (Choose_Move)))))
+  
+
+(defun Check_Win(G)
+  (if (null G) T NIL))
+
+(defun Do_Move(G Move)
+  (let ((rule (nth Move *rules*)))
+    (Turn_To_X G rule (Turn_To_O G rule))))
+
+(defun Turn_To_O(G rule &optional Res)
+  (cond 
+   ((null G) Res)
+   ((member (car G) rule) (Turn_To_O (cdr G) rule Res))
+   (T (Turn_To_O (cdr G) rule (cons (car G) Res)))))
+
+(defun Turn_To_X(G_Old rule &optional Res)
+  (cond
+   ((null rule) Res)
+   ((not (member (car rule) G_Old)) (Turn_To_X G_Old (cdr rule) (cons (car rule) Res)))
+   (T (Turn_To_X G_Old (cdr rule) Res)))) 
+
+(defun Congratulations (Steps)
+  (format t "~%Congratulations! You beat the game in ~D steps" Steps))
