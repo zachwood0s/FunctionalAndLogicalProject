@@ -103,7 +103,7 @@
 ; Such as if a move got rid of a lot of X's it would have a higher score and that path would be explored first
 ; Once it's score became lower than another path's, the other path would start to be evaluated. I think this would
 ; be more similar to a dikstras or A* algorithm rather than a naive breadth first. But mine works, it just isn't the quickest.
-
+;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun Auto_Play ()
   (let (Game RndSt Move (StepCnt 0))
@@ -122,16 +122,14 @@
 
 (defun Do_Auto_Play (AI_Games Steps)
     (let* ((New_AI_Games (Do_Search AI_Games)) (Winner (Find_Winning_Path New_AI_Games)))
-       ;(print New_AI_Games)
-       ;(read)
         (if (not (null Winner)) (list Winner Steps)
-            (Do_Auto_Play New_AI_Games (1+ Steps)))))
+            (Do_Auto_Play New_AI_Games (1+ Steps))))) 
 
 (defun Setup_Starting_Games (G)
     (list(list (copy-list G) (list '()))))
 
 
-(defconstant *maxPaths* 20)
+(defconstant *maxPaths* 100)
 
 (defun Do_Search (AI_Games)
   (let (New_Games)
@@ -169,6 +167,7 @@
   ((null Rule) NIL)
   ((member (car Rule) Game) T)
   (T (Will_Flip_X Game (cdr Rule)))))
+
 
 (defun Will_Create_Loop (Moves Move &optional (total_moves (cons Move Moves)) (slice_index (1+ (floor (length total_moves) 2))) )
     (let ((l1 (slice total_moves 0 slice_index))
